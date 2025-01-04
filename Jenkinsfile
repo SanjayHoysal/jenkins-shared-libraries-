@@ -1,7 +1,7 @@
 @Library('my-shared-library@main') _  // Correct syntax
 
 pipeline {
-    agent { label 'slave' }
+    agent { label 'Slave-1' }
 
     environment {
         JAVA_HOME = '/usr/lib/jvm/java-17-openjdk-amd64'
@@ -11,57 +11,84 @@ pipeline {
 
     stages {
         stage('Checkout Code') {
-            steps {
-                checkoutCode()
+            steps { 
+                script {
+                   pipelineAll.checkoutCode()
+               }
             }
         }
 
         stage('Set up Java 17') {
             steps {
-                setupJava()
+                 script {
+                   pipelineAll.setupJava()
+                 }
             }
         }
 
         stage('Set up Maven') {
             steps {
-                setupMaven()
+                 script {
+                   pipelineAll.setupMaven()
+                 }
             }
         }
 
         stage('Build with Maven') {
             steps {
-                buildProject()
+                 script {
+                   pipelineAll.buildProject()
+                 }
+            }
+        }
+
+        stage('Tag Build') {
+            steps {
+                script {
+                    def buildTag = "build-${env.BUILD_NUMBER}"
+                    tagBuild(buildTag, "Tagging build number ${env.BUILD_NUMBER}")
+                }
             }
         }
 
         stage('Upload Artifact') {
             steps {
-                uploadArtifact('target/bus-booking-app-1.0-SNAPSHOT.jar')
+                 script {
+                   pipelineAll.uploadArtifact('target/petclinic-0.0.1-SNAPSHOT.jar')
+                 }
             }
         }
 
         stage('Run Application') {
             steps {
-                runApplication()
+                 script {
+                   pipelineAll.runApplication()
+                 }
             }
         }
 
         stage('Validate App is Running') {
             steps {
-                validateApp()
+                 script {
+                   pipelineAll.validateApp()
+                 }
             }
         }
 
         stage('Gracefully Stop Spring Boot App') {
             steps {
-                stopApplication()
+                 script {
+                   pipelineAll.stopApplication()
+                 }
             }
         }
     }
 
     post {
         always {
-            cleanup()
+             script {
+                   pipelineAll.cleanup()
+             }
         }
     }
 }
